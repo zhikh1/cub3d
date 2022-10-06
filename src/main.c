@@ -6,10 +6,12 @@
 /*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/02 13:32:06 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/05 23:16:53 by nomargen         ###   ########.fr       */
+/*   Updated: 2022/10/06 23:22:50 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "../inc/main.h"
+
+#include <stdio.h>
 
 int	safe_free(void *ptr, int ret_val)
 {
@@ -20,7 +22,7 @@ int	safe_free(void *ptr, int ret_val)
 
 int	print_err_with_header(int line, char *err_str)
 {
-	ft_putstr_fd("Error in line #", ERR_FD);
+	ft_putstr_fd("Error\nIn line #", ERR_FD);
 	ft_putnbr_fd(line, ERR_FD);
 	ft_putstr_fd(": ", ERR_FD);
 	if (err_str != NULL)
@@ -137,17 +139,19 @@ int	parse_rgb(int *rgb, char *crnt_str, int line)
 	{
 		num_len = get_num_len(crnt_str);
 		if (num_len == 0 || crnt_str[0] == 0)
-			return (print_err_with_header(line, "Wrong RGB format! \n Must be: \"<R>,<G>,<B>\""));
+			return (print_err_with_header(line, "Wrong RGB format!\nMust be: \"<R>,<G>,<B>\"\n"));
 		else if (num_len > 3 || ft_atoi(crnt_str) > 255)
-			return (print_err_with_header(line, "Wrong RGB number range! \nMust be in range of 0-255"));
+			return (print_err_with_header(line, "Wrong RGB number range!\nMust be in range of 0-255\n"));
 		else
 			rgb_mas[i] = ft_atoi(crnt_str);
-		if (i != 2)
-			//////////////////////////////////////////////////
-
+		if (i != 2 && crnt_str[num_len] != ',')
+			return (print_err_with_header(line, "Wrong RGB format!\nMust be: \"<R>,<G>,<B>\"\n"));
+		crnt_str += num_len + (i != 2);
 		i++;
 	}
-	*rgb = rgb_to_int(rgb_mas[0], rgb_mas[2], rgb_mas[3]);
+	if (*crnt_str != 0)
+		return (print_err_with_header(line, "There should be a new line after the numbers!\n"));
+	*rgb = (rgb_mas[0] << 16 | rgb_mas[1] << 8 | rgb_mas[2]);
 	return (1);
 }
 
@@ -159,8 +163,6 @@ int	parce_ceilling_n_floor_colors(t_game *game, int map_file_fd, int *line)
 	int			*color_ptr;
 
 	i = 0;
-	if (!check_empty_line(map_file_fd, line))
-		return (0);
 	while (i < 2)
 	{
 		crnt_str = get_next_line(map_file_fd);
@@ -208,6 +210,63 @@ int	parce_textures(t_game *game, int map_file_fd, int *line)
 	return (1);
 }
 
+int is_map_char(char ch)
+{
+	if (ch == '0' || ch == '1' || ch == ' ')
+		return (1);
+	if (ch == 'N' || ch == 'S' || ch == 'E' || ch == 'W')
+		return (2);
+	return (0);
+}
+
+int	check_map_line_content(char *crnt_str, int line)
+{
+	while (*crnt_str)
+	{
+		if (!is_map_char(*crnt_str))
+		{
+			print_err_with_header(line, "Wrong symbol \"");
+			ft_putchar_fd(*crnt_str, ERR_FD);
+			ft_putstr_fd("\" in map!\nSymbols in map can be only:\
+\"0\",\"1\",\" \",\"N\",\"S\",\"E\",\"W\".\n", ERR_FD);
+			return (0);
+		}
+		crnt_str++;
+	}
+	return (1);
+}
+
+//доработать отсутствие карты
+//проработать обнаружение игрока, его отсутствие и их избыток
+int	check_map(t_game *game, int map_file_fd, int *line)
+{
+	char	*crnt_str;
+	int		line_len;
+
+	crnt_str = get_next_line(map_file_fd);
+	(*line)++;
+	while (crnt_str != NULL)
+	{
+		line_len = ft_strlen(crnt_str);
+		if (crnt_str[line_len - 1] == '\n')
+		{
+			crnt_str[line_len - 1] = 0;
+			line_len--;
+		}
+		if (line_len == 0)
+			return (print_err_with_header(*line, "Map cannot have empty fields!\n"));
+		if (!check_map_line_content(crnt_str, *line))
+			return (safe_free(crnt_str, 0));
+		if (game->map_size_x < line_len)
+			game->map_size_x = line_len;
+		game->map_size_y++;
+		free(crnt_str);
+		crnt_str = get_next_line(map_file_fd);
+		(*line)++;
+	}
+	return (1);
+}
+
 int	parce_map_file(t_game *game, char const *map_file_path)
 {
 	int	map_file_fd;
@@ -224,12 +283,16 @@ int	parce_map_file(t_game *game, char const *map_file_path)
 	}
 	if (!parce_textures(game, map_file_fd, &line))
 		return (0);
+	if (!check_empty_line(map_file_fd, &line))
+		return (0);
 	if (!parce_ceilling_n_floor_colors(game, map_file_fd, &line))
 		return (0);
-	// if (!check_map(game, map_file_fd))
-	// 	return (0);
-	close(map_file_fd);
+	if (!check_empty_line(map_file_fd, &line))
+		return (0);
+	if (!check_map(game, map_file_fd, &line))
+		return (0);
 	// generate_map(game, map_file_path);
+	close(map_file_fd);
 	return (1);
 }
 
