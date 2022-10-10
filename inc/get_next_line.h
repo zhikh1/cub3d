@@ -6,7 +6,7 @@
 /*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/16 19:21:15 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/04 22:53:49 by nomargen         ###   ########.fr       */
+/*   Updated: 2022/10/10 20:42:48 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef GET_NEXT_LINE_H
@@ -15,7 +15,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-#define BUFFER_SIZE (64)
+# define BUFFER_SIZE (64)
 
 typedef struct line_s{
 	int				fd;
