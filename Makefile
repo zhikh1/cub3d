@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+         #
+#    By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/02/27 19:32:48 by nomargen          #+#    #+#              #
-#    Updated: 2022/10/10 20:46:52 by nomargen         ###   ########.fr        #
+#    Updated: 2022/10/20 22:32:46 by cjanetta         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,9 +24,9 @@ SRC			=	$(addprefix $(SRC_DIR), $(SRC_FILES))
 
 INC			=	$(addprefix $(INC_DIR), $(INC_FILES))
 
-SRC_FILES	=	main.c parser_1.c parser_2.c parser_3.c parser_utils_1.c parser_utils_2.c get_next_line_utils.c get_next_line.c
+SRC_FILES	=	main.c parser_1.c parser_2.c parser_3.c parser_utils_1.c parser_utils_2.c get_next_line_utils.c get_next_line.c draw_map.c handler_func.c utils1.c utils2.c utils3.c
 
-INC_FILES	=	main.h parser.h get_next_line.h
+INC_FILES	=	main.h parser.h get_next_line.h draw_map.h
 
 OBJ			=	$(SRC:.c=.o)
 
@@ -36,7 +36,7 @@ LIBFT		=	$(addsuffix .a, $(LIBFT_DIR))
 
 RM			=	rm -rf
 
-LDLIBS		=	-lft
+LDLIBS		=	-lft -Lmlx -lmlx -lXext -lX11 -lm
 
 
 %.o: %.с  

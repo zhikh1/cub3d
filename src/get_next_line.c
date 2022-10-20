@@ -3,131 +3,102 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/16 19:19:11 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/09 18:08:22 by nomargen         ###   ########.fr       */
+/*   Created: 2021/10/24 17:14:53 by cjanetta          #+#    #+#             */
+/*   Updated: 2022/10/20 23:36:54 by cjanetta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "../inc/get_next_line.h"
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 42
-#endif
-
-void	free_str(t_line *line_struct)
+static void	ft_con(char **line, char *buf)
 {
-	t_line	*prev;
+	char	*tmp;
 
-	if (line_struct && line_struct->head)
-	{
-		prev = *(line_struct->head);
-		while (prev && prev->next_line != line_struct)
-			prev = prev->next_line;
-		if (line_struct == *(line_struct->head))
-			*(line_struct->head) = line_struct->next_line;
-		else if (prev)
-			prev->next_line = line_struct->next_line;
-		if (line_struct->str)
-			free(line_struct->str);
-		free(line_struct);
-	}
+	tmp = *line;
+	*line = ft_strjoin(*line, buf);
+	free (tmp);
 }
 
-void	small(size_t i, size_t end, char *str, t_line *line_struct)
+static void	ft_move_buf(char **buf, int index)
 {
-	while (i < end && str[i] && str[i] != '\n' && str[i] != '\r')
-		i++;
-	if (i < end)
-	{
-		line_struct->fact_size = i + (str[i] == '\n' || str[i] == '\r');
-		line_struct->eol_flag = ((str[i] == '\n')
-				|| (str[i] == '\r') || (!line_struct->read_size));
-	}
-	else if (i != 0)
-	{
-		line_struct->fact_size = i + (str[i - 1] == '\n'
-				|| str[i - 1] - 1 == '\r');
-		line_struct->eol_flag = ((str[i - 1] == '\n')
-				|| (str[i - 1] == '\r') || (!line_struct->read_size));
-	}
-	else
-	{
-		line_struct->fact_size = 0;
-		line_struct->eol_flag = 0;
-	}
+	char	*tmp;
+
+	tmp = *buf;
+	(*buf)[index] = '\n';
+	*buf = ft_substr(*buf, index + 1, BUFFER_SIZE);
+	free (tmp);
 }
 
-void	ft_update_fact_size(t_line *line_struct, int only_tail)
+static int	ft_read(int fd, char **buf)
 {
-	size_t	i;
-	size_t	end;
-	char	*str;
+	int	ret;
 
-	str = line_struct->str;
-	if (((int)line_struct->buf_size >= (int)BUFFER_SIZE) && str)
+	if (*buf)
 	{
-		if (only_tail)
+		free (*buf);
+		*buf = (void *)0;
+	}
+	*buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!*buf)
+		return (0);
+	ret = read(fd, *buf, BUFFER_SIZE);
+	if (ret <= 0)
+	{
+		free (*buf);
+		*buf = (void *)0;
+		return (0);
+	}
+	(*buf)[ret] = '\0';
+	return (1);
+}
+
+static char	*ft_gnl(int fd, char **buf)
+{
+	char	*line;
+	int		count;
+
+	count = 0;
+	line = (char *)malloc(sizeof(char));
+	line[count] = '\0';
+	if (!line)
+		return ((void *)0);
+	while ((*buf)[count] != '\n')
+	{
+		if ((*buf)[count] == '\0')
 		{
-			i = (line_struct->buf_size - BUFFER_SIZE);
-			end = line_struct->buf_size - BUFFER_SIZE + line_struct->read_size;
+			ft_con(&line, *buf);
+			if (!ft_read(fd, buf))
+				return (line);
+			count = 0;
 		}
 		else
-		{
-			i = 0;
-			end = line_struct->buf_size - BUFFER_SIZE;
-		}				
-		small(i, end, str, line_struct);
+			count++;
 	}
-	else
-	{		
-		line_struct->fact_size = 0;
-		line_struct->eol_flag = 1;
-	}
-}
-
-char	*check_preveous_data(t_line *line_struct)
-{
-	char	*new_line;
-
-	new_line = NULL;
-	if (line_struct)
-	{
-		if (line_struct->eol_flag && line_struct->read_size)
-		{
-			line_struct->buf_size = BUFFER_SIZE;
-			new_line = change_size(&line_struct, 1);
-		}
-		else
-			line_struct->eol_flag = 0;
-	}
-	return (new_line);
+	(*buf)[count] = '\0';
+	ft_con(&line, *buf);
+	ft_con(&line, "\n");
+	ft_move_buf(buf, count);
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	t_line	*line_struct;
-	char	*new_line;
+	static char	*buf;
+	char		*line;
 
-	new_line = NULL;
-	if (BUFFER_SIZE <= 0 && fd < 0)
-		return (NULL);
-	line_struct = get_line_struct(fd);
-	new_line = check_preveous_data(line_struct);
-	while (line_struct && !line_struct->eol_flag && line_struct->str)
+	if (fd < 0)
+		return ((void *)0);
+	if (!buf)
+		if (!ft_read(fd, &buf))
+			return ((void *)0);
+	line = ft_gnl(fd, &buf);
+	if (line[0] == '\0')
 	{
-		line_struct->read_size = read(fd, &line_struct->str
-			[line_struct->buf_size - BUFFER_SIZE], BUFFER_SIZE);
-		if ((long int)line_struct->read_size >= 0)
-		{	
-			ft_update_fact_size(line_struct, 1);
-			new_line = change_size(&line_struct, line_struct->eol_flag);
-		}
-		else
-		{
-			free_str(line_struct);
-			return (NULL);
-		}
+		free (line);
+		return ((void *)0);
 	}
-	return (new_line);
+	else
+		return (line);
 }

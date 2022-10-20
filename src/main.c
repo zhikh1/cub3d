@@ -3,12 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/02 13:32:06 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/10 20:43:49 by nomargen         ###   ########.fr       */
+/*   Updated: 2022/10/20 23:36:19 by cjanetta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "../inc/main.h"
 
 void	null_game(t_game *game)
@@ -57,9 +58,7 @@ int	generate_game(char const *map_file_path, t_game *game)
 	return (1);
 }
 
-void	run_game(t_game *game)
-{
-	for (int i = 0; i < game->map_size_y; i++)
+/*for (int i = 0; i < game->map_size_y; i++)
 	{
 		for (int j = 0; j < game->map_size_x; j++)
 			printf("%c", game->map[i][j]);
@@ -73,7 +72,25 @@ void	run_game(t_game *game)
 	printf("view_x:%f \n", game->view_direction.x);
 	printf("view_y:%f \n", game->view_direction.y);
 	printf("ceilling_color:%08x \n", game->ceilling_color);
-	printf("floor_color:%08x \n", game->floor_color);
+	printf("floor_color:%08x \n", game->floor_color);*/
+
+void	run_game(t_game *game)
+{
+	t_draw	draw;
+
+	if (!check_map_walls(game))
+	{
+		free_game(game);
+		ft_putstr_fd("Error\nInvalid map\n", 2);
+		exit (EXIT_FAILURE);
+	}
+	init(&draw, game);
+	make_textures_addr(&draw, game);
+	draw_map(&draw);
+	mlx_hook(draw.mlx.win, 2, 1L << 0, &keys_handler, &draw);
+	mlx_hook(draw.mlx.win, 17, 1L << 17, &stop_exit, &draw);
+	mlx_loop(draw.mlx.mlx);
+	exit_func(NULL, &draw);
 }
 
 int	main(int argc, char const *argv[])

@@ -3,134 +3,67 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/16 19:19:11 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/04 22:52:51 by nomargen         ###   ########.fr       */
+/*   Created: 2021/10/24 17:09:33 by cjanetta          #+#    #+#             */
+/*   Updated: 2022/10/20 23:36:55 by cjanetta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 #include "../inc/get_next_line.h"
 
-t_line	*get_new_line(int fd)
+size_t	ft_strlen(const char *s)
 {
-	t_line	*new_line;
-
-	new_line = (t_line *)malloc(sizeof(t_line));
-	if (new_line)
-	{
-		new_line->fd = fd;
-		new_line->str = malloc(sizeof(char) * (unsigned int)BUFFER_SIZE);
-		new_line->buf_size = BUFFER_SIZE;
-		new_line->read_size = 0;
-		new_line->fact_size = 0;
-		new_line->eol_flag = 0;
-		new_line->next_line = NULL;
-		if (new_line->str == NULL)
-		{
-			free(new_line);
-			new_line = NULL;
-		}
-	}
-	return (new_line);
-}
-
-t_line	*get_line_struct(int fd)
-{
-	static t_line	*lst_head = NULL;
-	t_line			*crnt;
-
-	if (lst_head)
-	{
-		crnt = lst_head;
-		while (crnt->next_line && crnt->fd != fd)
-			crnt = crnt->next_line;
-		if (crnt->next_line == NULL && crnt->fd != fd)
-		{
-			crnt->next_line = get_new_line(fd);
-			crnt = crnt->next_line;
-		}
-		else
-			ft_update_fact_size(crnt, 0);
-	}
-	else
-	{
-		crnt = get_new_line(fd);
-		lst_head = crnt;
-	}
-	if (crnt)
-		crnt->head = &lst_head;
-	return (crnt);
-}
-
-char	*ft_realloc(char *src, size_t src_size, size_t dst_size, int del)
-{
-	char	*new;
 	size_t	i;
 
 	i = 0;
-	new = (char *) malloc(sizeof(char) * dst_size);
-	while (new && (i < src_size) && (i < dst_size) && src)
+	while (s[i])
+		i++;
+	return (i);
+}
+
+char	*ft_substr(char const *s, unsigned int start, size_t len)
+{
+	char		*p;
+	size_t		i;
+
+	i = 0;
+	if (!s)
+		return ((void *)0);
+	if (start >= ft_strlen(s))
 	{
-		new[i] = src[i];
+		p = (char *)malloc(sizeof(char));
+		p[0] = '\0';
+		return (p);
+	}
+	p = (char *)malloc(sizeof(char) * len + 1);
+	if (!p)
+		return ((void *)0);
+	while (s[start] && i < len)
+	{
+		p[i] = s[start];
+		start++;
 		i++;
 	}
-	if (src && new && del)
-		free(src);
-	return (new);
+	p[i] = '\0';
+	return (p);
 }
 
-char	*remap_ptrs(char *tail_pt, int split_en,
-	t_line *line_struct, size_t	tail_size)
+char	*ft_strjoin(char const *s1, char const *s2)
 {
-	char	*line_pt;
+	char	*p;
+	int		i;
 
-	if (line_struct->fact_size)
-		line_pt = ft_realloc(line_struct->str,
-				line_struct->buf_size, line_struct->fact_size
-				+ (BUFFER_SIZE * !split_en) + (split_en == 1), 1);
-	else
-	{
-		free(line_struct->str);
-		line_pt = NULL;
-	}
-	line_struct->str = line_pt;
-	line_struct->buf_size = line_struct->fact_size + (BUFFER_SIZE * !split_en);
-	if (split_en)
-	{
-		line_struct->str = tail_pt;
-		line_struct->buf_size = tail_size;
-		line_struct->read_size = tail_size - BUFFER_SIZE;
-		if (line_pt)
-			line_pt[line_struct->fact_size] = 0;
-	}	
-	if (!line_pt && tail_pt)
-		free(tail_pt);
-	return (line_pt);
-}
-
-char	*change_size(t_line **line_struct_p, int split_en)
-{
-	char	*line_pt;
-	char	*tail_pt;
-	size_t	tail_size;
-	t_line	*line_struct;
-
-	line_struct = *line_struct_p;
-	if (!line_struct)
-		return (NULL);
-	tail_pt = NULL;
-	tail_size = line_struct->buf_size
-		+ line_struct->read_size - line_struct->fact_size;
-	if (split_en)
-	{
-		tail_pt = ft_realloc(&line_struct->str
-			[line_struct->fact_size], tail_size - BUFFER_SIZE, tail_size, 0);
-	}
-	line_pt = remap_ptrs(tail_pt, split_en, line_struct, tail_size);
-	if (line_struct->fact_size == 0)
-	{
-		free_str(line_struct);
-		*line_struct_p = NULL;
-	}
-	return (line_pt);
+	i = 0;
+	if (!s1 || !s2)
+		return ((void *)0);
+	p = (char *)malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2) + 1));
+	if (!p)
+		return ((void *)0);
+	while (*s1)
+		p[i++] = *s1++;
+	while (*s2)
+		p[i++] = *s2++;
+	p[i] = '\0';
+	return (p);
 }
