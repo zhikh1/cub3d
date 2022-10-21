@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   draw_map.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/18 15:46:03 by cjanetta          #+#    #+#             */
-/*   Updated: 2022/10/20 23:53:44 by cjanetta         ###   ########.fr       */
+/*   Updated: 2022/10/21 19:26:19 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,5 +104,6 @@ void	draw_map(t_draw *draw)
 		draw_line(draw);
 		draw->ray.i++;
 	}
+	draw_minimap(draw);
 	mlx_put_image_to_window(draw->mlx.mlx, draw->mlx.win, draw->mlx.img, 0, 0);
 }

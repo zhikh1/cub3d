@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   draw_map.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/18 15:44:19 by cjanetta          #+#    #+#             */
-/*   Updated: 2022/10/20 23:32:21 by cjanetta         ###   ########.fr       */
+/*   Updated: 2022/10/21 21:03:12 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,5 +91,6 @@ int		get_text_of_hit(t_draw *draw, int x, int y);
 void	set_floor_ceil(t_draw *draw, int color, int start);
 void	put_pixel_on_img(t_draw *draw, int x, int y, int color);
 int		check_map_walls(t_game *game);
+void	draw_minimap(t_draw *draw);
 
 #endif

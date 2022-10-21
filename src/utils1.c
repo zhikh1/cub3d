@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils1.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/20 22:25:49 by cjanetta          #+#    #+#             */
-/*   Updated: 2022/10/20 23:38:37 by cjanetta         ###   ########.fr       */
+/*   Updated: 2022/10/21 21:32:03 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ void	make_textures_addr(t_draw *draw, t_game *game)
 
 int	check_map_walls2(t_game *game, int i, int j)
 {
+	if (i == 0 || !(game->map[i - 1][j] == '1'
+		|| game->map[i - 1][j] == '0'))
+		return (0);
+	if (j == 0 || !(game->map[i][j - 1] == '1'
+		|| game->map[i][j - 1] == '0'))
+		return (0);
 	if (j == game->map_size_x - 1 || !(game->map[i][j + 1] == '1'
 		|| game->map[i][j + 1] == '0'))
 		return (0);
@@ -58,14 +64,12 @@ int	check_map_walls(t_game *game)
 		{
 			if (game->map[i][j] == '0')
 			{
-				if (i == 0 || !(game->map[i - 1][j] == '1'
-					|| game->map[i - 1][j] == '0'))
-					return (0);
-				if (j == 0 || !(game->map[i][j - 1] == '1'
-					|| game->map[i][j - 1] == '0'))
-					return (0);
 				if (!check_map_walls2(game, i, j))
+				{
+					print_err_with_header(i + 9,
+						"The walls on the map are placed incorrectly!\n");
 					return (0);
+				}
 			}
 			j++;
 		}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cjanetta <cjanetta@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nomargen <nomargen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/02 13:32:06 by nomargen          #+#    #+#             */
-/*   Updated: 2022/10/20 23:36:19 by cjanetta         ###   ########.fr       */
+/*   Updated: 2022/10/21 21:27:18 by nomargen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,22 +58,6 @@ int	generate_game(char const *map_file_path, t_game *game)
 	return (1);
 }
 
-/*for (int i = 0; i < game->map_size_y; i++)
-	{
-		for (int j = 0; j < game->map_size_x; j++)
-			printf("%c", game->map[i][j]);
-		printf("\n");
-	}
-	printf("-----------------------------------------\n");
-	printf("map_size_x:%d \n", game->map_size_x);
-	printf("map_size_x:%d \n", game->map_size_y);
-	printf("pos_x:%f \n", game->position.x);
-	printf("pos_y:%f \n", game->position.y);
-	printf("view_x:%f \n", game->view_direction.x);
-	printf("view_y:%f \n", game->view_direction.y);
-	printf("ceilling_color:%08x \n", game->ceilling_color);
-	printf("floor_color:%08x \n", game->floor_color);*/
-
 void	run_game(t_game *game)
 {
 	t_draw	draw;
@@ -81,7 +65,6 @@ void	run_game(t_game *game)
 	if (!check_map_walls(game))
 	{
 		free_game(game);
-		ft_putstr_fd("Error\nInvalid map\n", 2);
 		exit (EXIT_FAILURE);
 	}
 	init(&draw, game);
